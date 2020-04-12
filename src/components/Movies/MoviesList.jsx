@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import MovieItem from './MovieItem'
 import { API_URL, API_KEY_3 } from '../../api/api'
+import queryString from 'query-string'
+import _ from 'lodash'
 
 export default class MovieList extends Component {
 	constructor() {
@@ -16,9 +18,19 @@ export default class MovieList extends Component {
 		page = this.props.page
 	}) {
 		try {
-			const genres = with_genres.join('%7C') // %7C - знак ИЛИ (пример: драма или боевик или вестерн)
+			if (with_genres.length > 1) {
+				with_genres = with_genres.join('|') // | - знак ИЛИ (пример: драма или боевик или вестерн)
+			}
+			let queryStringParams = {
+				api_key: API_KEY_3,
+				sort_by,
+				page,
+				primary_release_year,
+				with_genres
+			}
+
 			const response = await fetch(
-				`${API_URL}/discover/movie?api_key=${API_KEY_3}&language=ru-RU&sort_by=${sort_by}&page=${page}&primary_release_year=${primary_release_year}&with_genres=${genres}`
+				`${API_URL}/discover/movie?${queryString.stringify(queryStringParams)}`
 			)
 			const data = await response.json()
 
@@ -44,11 +56,7 @@ export default class MovieList extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (
-			this.props.filters.sort_by !== prevProps.filters.sort_by ||
-			this.props.filters.primary_release_year !== prevProps.filters.primary_release_year ||
-			this.props.filters.with_genres.length !== prevProps.filters.with_genres.length
-		) {
+		if (!_.isEqual(this.props.filters, prevProps.filters)) {
 			if (this.props.page !== 1) {
 				this.props.onChangeParam('page', 1)
 			}
@@ -73,7 +81,7 @@ export default class MovieList extends Component {
 				{movies.map(movie => {
 					return (
 						<div key={movie.id} className="col-6 mb-4">
-							<MovieItem item={movie} />
+							<MovieItem {...movie} />
 						</div>
 					)
 				})}
