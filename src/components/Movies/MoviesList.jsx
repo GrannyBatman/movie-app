@@ -23,6 +23,7 @@ export default class MovieList extends Component {
 			}
 			let queryStringParams = {
 				api_key: API_KEY_3,
+				language: 'ru-RU',
 				sort_by,
 				page,
 				primary_release_year,

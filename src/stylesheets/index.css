@@ -1,3 +1,16 @@
 body {
-  background: #fdfdfd; 
+	background: #fdfdfd;
+}
+
+.card-img-wrap {
+	min-height: 196px;
+	background: #ccc;
+}
+
+.invalid-feedback {
+	display: block;
+}
+
+.invalid-field {
+	border-color: #dc3545;
 }
