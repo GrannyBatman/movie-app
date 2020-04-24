@@ -1,6 +1,6 @@
 import React from 'react'
 import { Modal, ModalBody } from 'reactstrap'
-import LoginForm from './LoginForm'
+import LoginFormContainer from './LoginForm'
 
 export default class Login extends React.Component {
 	state = {
@@ -21,10 +21,7 @@ export default class Login extends React.Component {
 				</button>
 				<Modal isOpen={this.state.showModal} toggle={this.toggleModal}>
 					<ModalBody>
-						<LoginForm
-							onChangeParam={this.props.onChangeParam}
-							updateCookie={this.props.updateCookie}
-						></LoginForm>
+						<LoginFormContainer></LoginFormContainer>
 					</ModalBody>
 				</Modal>
 			</div>

@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { API_URL, API_KEY_3, createFetchBodyPost } from '../../../api/api'
+import CallApi from '../../../api/api'
 import Field from '../../UIComponents/Field'
+import AppContextHOC from './../../HOC/AppContextHOC'
 
-export default class LoginForm extends Component {
+class LoginForm extends Component {
 	state = {
 		fields: {
 			username: '',
@@ -82,9 +83,7 @@ export default class LoginForm extends Component {
 
 		// get authentication token
 		try {
-			const auth = await (
-				await fetch(`${API_URL}/authentication/token/new?api_key=${API_KEY_3}`)
-			).json()
+			const auth = await (await CallApi.get('/authentication/token/new')).json()
 			if (auth.status_code) {
 				throw new Error(auth.status_message)
 			}
@@ -92,14 +91,13 @@ export default class LoginForm extends Component {
 			// login user
 			try {
 				const authLogin = await (
-					await fetch(
-						`${API_URL}/authentication/token/validate_with_login?api_key=${API_KEY_3}`,
-						createFetchBodyPost({
+					await CallApi.post('/authentication/token/validate_with_login', {
+						body: {
 							username: this.state.fields.username,
 							password: this.state.fields.password,
 							request_token: auth.request_token
-						})
-					)
+						}
+					})
 				).json()
 				if (authLogin.status_code) {
 					throw new Error(authLogin.status_message)
@@ -108,12 +106,11 @@ export default class LoginForm extends Component {
 				// get session token
 				try {
 					const authSession = await (
-						await fetch(
-							`${API_URL}/authentication/session/new?api_key=${API_KEY_3}`,
-							createFetchBodyPost({
+						await CallApi.post('/authentication/session/new', {
+							body: {
 								request_token: auth.request_token
-							})
-						)
+							}
+						})
 					).json()
 					if (authSession.status_code) {
 						throw new Error(authSession.status_message)
@@ -125,9 +122,11 @@ export default class LoginForm extends Component {
 					// account details
 					try {
 						const accountDetails = await (
-							await fetch(
-								`${API_URL}/account?api_key=${API_KEY_3}&session_id=${authSession.session_id}`
-							)
+							await CallApi.get('/account', {
+								params: {
+									session_id: authSession.session_id
+								}
+							})
 						).json()
 
 						this.setState(
@@ -238,3 +237,5 @@ export default class LoginForm extends Component {
 		)
 	}
 }
+
+export default AppContextHOC(LoginForm)

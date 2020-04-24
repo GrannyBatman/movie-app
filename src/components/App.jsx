@@ -1,12 +1,13 @@
-import React from 'react'
+import React, { createContext } from 'react'
 import Filters from './Filters/Filters'
 import MoviesList from './Movies/MoviesList'
 import ResetFilters from './ResetFilters'
 import Header from './Header/Header'
 import Cookies from 'universal-cookie'
-import { API_URL, API_KEY_3 } from '../api/api'
+import CallApi from '../api/api'
 
 const cookies = new Cookies()
+export const AppContext = createContext()
 
 export default class App extends React.Component {
 	state = {
@@ -18,7 +19,7 @@ export default class App extends React.Component {
 			with_genres: []
 		},
 		page: 1,
-		total_pages: 10
+		total_pages: ''
 	}
 
 	onChangeFilters = ({ target: { name, value } }) => {
@@ -43,6 +44,12 @@ export default class App extends React.Component {
 		})
 	}
 
+	removeCookie = key => {
+		cookies.remove(key, {
+			path: '/'
+		})
+	}
+
 	onResetFilters = () => {
 		this.setState({
 			filters: {
@@ -51,8 +58,16 @@ export default class App extends React.Component {
 				with_genres: []
 			},
 			page: 1,
-			total_pages: 10
+			total_pages: ''
 		})
+	}
+
+	onLogOut = () => {
+		this.setState({
+			user: null,
+			session_id: null
+		})
+		this.removeCookie('session_id')
 	}
 
 	async componentDidMount() {
@@ -60,11 +75,16 @@ export default class App extends React.Component {
 		if (session_id) {
 			try {
 				const accountDetails = await (
-					await fetch(`${API_URL}/account?api_key=${API_KEY_3}&session_id=${session_id}`)
+					await CallApi.get('/account', {
+						params: {
+							session_id
+						}
+					})
 				).json()
 
 				this.setState({
-					user: accountDetails
+					user: accountDetails,
+					session_id
 				})
 			} catch (error) {
 				console.log(`accountDetails: ${error.message}`)
@@ -73,14 +93,17 @@ export default class App extends React.Component {
 	}
 
 	render() {
-		const { filters, page, total_pages, user } = this.state
+		const { filters, page, total_pages, user, session_id } = this.state
 		return (
-			<>
-				<Header
-					onChangeParam={this.onChangeParam}
-					user={user}
-					updateCookie={this.updateCookie}
-				/>
+			<AppContext.Provider
+				value={{
+					user,
+					session_id,
+					onChangeParam: this.onChangeParam,
+					updateCookie: this.updateCookie
+				}}
+			>
+				<Header user={user} onLogOut={this.onLogOut} />
 				<div className="container">
 					<div className="row mt-4">
 						<div className="col-4">
@@ -108,7 +131,7 @@ export default class App extends React.Component {
 						</div>
 					</div>
 				</div>
-			</>
+			</AppContext.Provider>
 		)
 	}
 }

@@ -13,14 +13,7 @@ class Header extends React.Component {
 							<a className="nav-link">Home</a>
 						</li>
 					</ul>
-					{this.props.user ? (
-						<User {...this.props.user} />
-					) : (
-						<Login
-							onChangeParam={this.props.onChangeParam}
-							updateCookie={this.props.updateCookie}
-						/>
-					)}
+					{this.props.user ? <User onLogOut={this.props.onLogOut} /> : <Login />}
 				</div>
 			</nav>
 		)
