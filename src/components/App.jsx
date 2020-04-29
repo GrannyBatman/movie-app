@@ -19,7 +19,9 @@ export default class App extends React.Component {
 			with_genres: []
 		},
 		page: 1,
-		total_pages: ''
+		total_pages: '',
+		favoriteMovies: [],
+		watchlistMovies: []
 	}
 
 	onChangeFilters = ({ target: { name, value } }) => {
@@ -65,12 +67,22 @@ export default class App extends React.Component {
 	onLogOut = () => {
 		this.setState({
 			user: null,
-			session_id: null
+			session_id: null,
+			favoriteMovies: [],
+			watchlistMovies: []
 		})
 		this.removeCookie('session_id')
 	}
 
 	async componentDidMount() {
+		await this.checkSession()
+		if (this.state.session_id) {
+			this.getFavoriteMovies()
+			this.getWatchlistMovies()
+		}
+	}
+
+	async checkSession() {
 		const session_id = cookies.get('session_id')
 		if (session_id) {
 			try {
@@ -81,7 +93,6 @@ export default class App extends React.Component {
 						}
 					})
 				).json()
-
 				this.setState({
 					user: accountDetails,
 					session_id
@@ -92,15 +103,53 @@ export default class App extends React.Component {
 		}
 	}
 
+	async getFavoriteMovies() {
+		const favoriteMovies = await (
+			await CallApi.get(`/account/${this.state.user.id}/favorite/movies`, {
+				params: {
+					session_id: this.state.session_id,
+					language: 'ru-RU'
+				}
+			})
+		).json()
+		this.setState({
+			favoriteMovies: favoriteMovies.results
+		})
+	}
+
+	async getWatchlistMovies() {
+		const watchlistMovies = await (
+			await CallApi.get(`/account/${this.state.user.id}/watchlist/movies`, {
+				params: {
+					session_id: this.state.session_id,
+					language: 'ru-RU'
+				}
+			})
+		).json()
+		this.setState({
+			watchlistMovies: watchlistMovies.results
+		})
+	}
+
 	render() {
-		const { filters, page, total_pages, user, session_id } = this.state
+		const {
+			filters,
+			page,
+			total_pages,
+			user,
+			session_id,
+			favoriteMovies,
+			watchlistMovies
+		} = this.state
 		return (
 			<AppContext.Provider
 				value={{
 					user,
 					session_id,
 					onChangeParam: this.onChangeParam,
-					updateCookie: this.updateCookie
+					updateCookie: this.updateCookie,
+					favoriteMovies: favoriteMovies,
+					watchlistMovies: watchlistMovies
 				}}
 			>
 				<Header user={user} onLogOut={this.onLogOut} />
