@@ -1,10 +1,10 @@
 import React, { createContext } from 'react'
-import Filters from './Filters/Filters'
-import MoviesList from './Movies/MoviesList'
-import ResetFilters from './ResetFilters'
 import Header from './Header/Header'
 import Cookies from 'universal-cookie'
 import CallApi from '../api/api'
+import MoviesPage from './pages/MoviesPage/MoviesPage'
+import MoviePage from './pages/MoviePage/MoviePage'
+import { BrowserRouter, Route } from 'react-router-dom'
 
 const cookies = new Cookies()
 export const AppContext = createContext()
@@ -12,27 +12,8 @@ export const AppContext = createContext()
 export default class App extends React.Component {
 	state = {
 		user: null,
-		session_id: null,
-		filters: {
-			sort_by: 'popularity.desc',
-			primary_release_year: '',
-			with_genres: []
-		},
-		page: 1,
-		total_pages: '',
-		favoriteMovies: [],
-		watchlistMovies: []
+		session_id: null
 	}
-
-	onChangeFilters = ({ target: { name, value } }) => {
-		this.setState(state => ({
-			filters: {
-				...state.filters,
-				[name]: value
-			}
-		}))
-	}
-
 	onChangeParam = (key, value) => {
 		this.setState({
 			[key]: value
@@ -52,37 +33,15 @@ export default class App extends React.Component {
 		})
 	}
 
-	onResetFilters = () => {
-		this.setState({
-			filters: {
-				sort_by: 'popularity.desc',
-				primary_release_year: '',
-				with_genres: []
-			},
-			page: 1,
-			total_pages: ''
-		})
-	}
-
 	onLogOut = () => {
 		this.setState({
 			user: null,
-			session_id: null,
-			favoriteMovies: [],
-			watchlistMovies: []
+			session_id: null
 		})
 		this.removeCookie('session_id')
 	}
 
 	async componentDidMount() {
-		await this.checkSession()
-		if (this.state.session_id) {
-			this.getFavoriteMovies()
-			this.getWatchlistMovies()
-		}
-	}
-
-	async checkSession() {
 		const session_id = cookies.get('session_id')
 		if (session_id) {
 			try {
@@ -103,84 +62,23 @@ export default class App extends React.Component {
 		}
 	}
 
-	async getFavoriteMovies() {
-		const favoriteMovies = await (
-			await CallApi.get(`/account/${this.state.user.id}/favorite/movies`, {
-				params: {
-					session_id: this.state.session_id,
-					language: 'ru-RU'
-				}
-			})
-		).json()
-		this.setState({
-			favoriteMovies: favoriteMovies.results
-		})
-	}
-
-	async getWatchlistMovies() {
-		const watchlistMovies = await (
-			await CallApi.get(`/account/${this.state.user.id}/watchlist/movies`, {
-				params: {
-					session_id: this.state.session_id,
-					language: 'ru-RU'
-				}
-			})
-		).json()
-		this.setState({
-			watchlistMovies: watchlistMovies.results
-		})
-	}
-
 	render() {
-		const {
-			filters,
-			page,
-			total_pages,
-			user,
-			session_id,
-			favoriteMovies,
-			watchlistMovies
-		} = this.state
+		const { user, session_id } = this.state
 		return (
-			<AppContext.Provider
-				value={{
-					user,
-					session_id,
-					onChangeParam: this.onChangeParam,
-					updateCookie: this.updateCookie,
-					favoriteMovies: favoriteMovies,
-					watchlistMovies: watchlistMovies
-				}}
-			>
-				<Header user={user} onLogOut={this.onLogOut} />
-				<div className="container">
-					<div className="row mt-4">
-						<div className="col-4">
-							<div className="card" style={{ width: '100%' }}>
-								<div className="card-body">
-									<h3>Фильтры:</h3>
-									<Filters
-										page={page}
-										filters={filters}
-										onChangeFilters={this.onChangeFilters}
-										onChangeParam={this.onChangeParam}
-										total_pages={total_pages}
-									/>
-									<ResetFilters onResetFilters={this.onResetFilters} />
-								</div>
-							</div>
-						</div>
-						<div className="col-8">
-							<MoviesList
-								filters={filters}
-								page={page}
-								onChangeParam={this.onChangeParam}
-								total_pages={total_pages}
-							/>
-						</div>
-					</div>
-				</div>
-			</AppContext.Provider>
+			<BrowserRouter>
+				<AppContext.Provider
+					value={{
+						user,
+						session_id,
+						onChangeParam: this.onChangeParam,
+						updateCookie: this.updateCookie
+					}}
+				>
+					<Header user={user} onLogOut={this.onLogOut} />
+					<Route exact path="/" component={MoviesPage} />
+					<Route path="/movie/:id/:section" component={MoviePage} />
+				</AppContext.Provider>
+			</BrowserRouter>
 		)
 	}
 }

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Star, StarBorder, Bookmark, BookmarkBorder } from '@material-ui/icons'
 import CallApi from '../../api/api'
 import AppContextHOC from '../HOC/AppContextHOC'
+import { Link } from 'react-router-dom'
 
 class MovieItem extends Component {
 	state = {
@@ -52,27 +53,36 @@ class MovieItem extends Component {
 	// TODO: fix favorite/watchlist
 	componentDidUpdate(prevProps, prevState) {
 		// console.log('prevProps: ', prevProps)
-		if (prevProps.favoriteMovies.length !== this.props.favoriteMovies.length) {
-			console.log(123)
-		}
+		// if (prevProps.favoriteMovies.length !== this.props.favoriteMovies.length) {
+		// 	if (this.props.favoriteMovies.some(item => item.id === this.props.id)) {
+		// 		this.setState({
+		// 			favorite: true
+		// 		})
+		// 	}
+		// 	if (this.props.watchlistMovies.some(item => item.id === this.props.id)) {
+		// 		this.setState({
+		// 			watchlist: true
+		// 		})
+		// 	}
+		// }
 	}
 
 	componentDidMount() {
 		// console.log(this.props)
-		if (this.props.favoriteMovies.some(item => item.id === this.props.id)) {
-			this.setState({
-				favorite: true
-			})
-		}
-		if (this.props.watchlistMovies.some(item => item.id === this.props.id)) {
-			this.setState({
-				watchlist: true
-			})
-		}
+		// if (this.props.favoriteMovies.some(item => item.id === this.props.id)) {
+		// 	this.setState({
+		// 		favorite: true
+		// 	})
+		// }
+		// if (this.props.watchlistMovies.some(item => item.id === this.props.id)) {
+		// 	this.setState({
+		// 		watchlist: true
+		// 	})
+		// }
 	}
 
 	render() {
-		const { backdrop_path, poster_path, title, vote_average } = this.props
+		const { backdrop_path, poster_path, title, vote_average, id } = this.props
 		return (
 			<div className="card">
 				<div className="card-img-wrap">
@@ -85,10 +95,12 @@ class MovieItem extends Component {
 				<div className="card-body">
 					<div className="row">
 						<div className="col-8">
-							<h6 className="card-title">{title}</h6>
+							<Link to={`/movie/${id}/details`} className="card-title">
+								{title}
+							</Link>
 							<div className="card-text">Рейтинг: {vote_average}</div>
 						</div>
-						{this.props.session_id && (
+						{/* {this.props.session_id && (
 							<div className="col-4">
 								<span onClick={() => this.toggleList('favorite', 'favoriteMovies')}>
 									{this.state.favorite ? (
@@ -108,7 +120,7 @@ class MovieItem extends Component {
 									)}
 								</span>
 							</div>
-						)}
+						)} */}
 					</div>
 				</div>
 			</div>

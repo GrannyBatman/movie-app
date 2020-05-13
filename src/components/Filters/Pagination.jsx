@@ -21,7 +21,7 @@ const Pagination = ({ page, onChangeParam, total_pages }) => (
 			</button>
 		</div>
 		<div>
-			Страница: {page} из {total_pages}
+			Страница: <b>{page}</b> из <b>{total_pages}</b>
 		</div>
 	</div>
 )

@@ -1,6 +1,7 @@
 import React from 'react'
 import Login from './Login/Login'
 import User from './User'
+import { Link } from 'react-router-dom'
 
 class Header extends React.Component {
 	render() {
@@ -9,8 +10,9 @@ class Header extends React.Component {
 				<div className="container">
 					<ul className="navbar-nav">
 						<li className="nav-item active">
-							{/* eslint-disable-next-line */}
-							<a className="nav-link">Home</a>
+							<Link to="/" className="nav-link">
+								Home
+							</Link>
 						</li>
 					</ul>
 					{this.props.user ? <User onLogOut={this.props.onLogOut} /> : <Login />}

@@ -59,3 +59,11 @@ body {
 .icon-movie {
 	font-size: 35px !important;
 }
+
+.nav-link {
+	color: #000;
+}
+
+.nav-link:hover {
+	color: #000;
+}
